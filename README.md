@@ -1,7 +1,6 @@
 # SMS Registry
 
-The Registry module of a Student Management System: the four workflows a Registry Administrator uses
-every day.
+The Registry module of a Student Management System: the four workflows a Registry Administrator uses every day.
 
 1. **Enrolment:** student records, generated Student IDs, status changes, search and filters.
 2. **Fees and payments:** programme fees, payments, live balances, overdue flags.
