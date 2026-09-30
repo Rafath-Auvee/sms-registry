@@ -19,7 +19,7 @@ export function StaffCta({ size = "default" }: { size?: "sm" | "default" }) {
       shimmerColor="rgba(255,255,255,0.55)"
       shimmerDuration="4s"
       borderRadius="0.6rem"
-      className={cn("gap-2 font-medium", size === "sm" ? "px-3 py-1.5 text-xs" : "px-5 py-2.5 text-sm")}
+      className={cn("gap-2 font-medium", size === "sm" ? "h-8 px-3 text-xs" : "h-10 px-5 text-sm")}
       disabled={pending}
       onClick={() =>
         start(async () => {

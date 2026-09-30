@@ -32,7 +32,9 @@ export function StudentCta({ students }: { students: Option[] }) {
 
   return (
     <Dialog>
-      <DialogTrigger render={<Button variant="outline" size="lg" disabled={!students.length} />}>View as a student</DialogTrigger>
+      <DialogTrigger render={<Button variant="outline" className="h-10 rounded-[0.6rem] px-5 text-sm" disabled={!students.length} />}>
+        View as a student
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>View as a student</DialogTitle>
