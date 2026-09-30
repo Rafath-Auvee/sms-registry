@@ -7,6 +7,10 @@ services:
       POSTGRES_DB: sms_registry
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sms -d sms_registry"]
+      interval: 2s
+      retries: 15
     volumes:
       - pgdata:/var/lib/postgresql/data
 

@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SMS Registry
 
-## Getting Started
+Registry module of a Student Management System: enrolment, fees and payments, assessment
+submission, and marksheet and results.
 
-First, run the development server:
+Next.js (App Router) · PostgreSQL · Prisma · Tailwind · shadcn/ui
+
+## Run it locally
+
+Needs Node.js 20+ and a PostgreSQL database.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Rafath-Auvee/sms-registry.git
+cd sms-registry
+npm install          # also generates the Prisma client (postinstall)
+cp .env.example .env # then set DATABASE_URL, see below
+npm run setup        # creates the tables and loads the demo data
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Getting a database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Either way works; pick one before `npm run setup`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**A. Your own PostgreSQL** (local install or a hosted one such as Neon or Supabase). Create an empty
+database and put its URL in `.env`:
 
-## Learn More
+```bash
+createdb sms_registry
+# .env
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/sms_registry"
+```
 
-To learn more about Next.js, take a look at the following resources:
+**B. Docker** (nothing to install besides Docker). Start the bundled Postgres; the URL in
+`.env.example` already matches it:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run db:up        # docker compose up, waits until Postgres is ready
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+A fresh clone has an empty database. `npm run setup` creates the tables and fills them with the demo
+data, so the app opens with students, fees, submissions and grades already in place.
 
-## Deploy on Vercel
+## Environment variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variable | Example | Purpose |
+|---|---|---|
+| `DATABASE_URL` | `postgresql://sms:sms@localhost:5432/sms_registry` | PostgreSQL connection string. The example matches `docker-compose.yml` (option B). |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Database commands
+
+| Command | What it does |
+|---|---|
+| `npm run setup` | Apply all migrations and load the demo data (first run) |
+| `npm run db:up` | Optional: start Postgres in Docker and wait until it is ready |
+| `npm run db:generate` | Generate the Prisma client into `src/generated/prisma` from `prisma/schema.prisma` (same as `npx prisma generate`) |
+| `npm run db:migrate` | Create and apply a migration after a schema change (also regenerates the client) |
+| `npm run db:seed` | Load the demo data (`prisma/seed.ts`); safe to run again |
+| `npm run db:reset` | Drop everything, re-apply all migrations and reload the demo data |
+
+`src/generated/prisma` is not committed. It is rebuilt from the schema by `npm install` or
+`npm run db:generate`; if it is missing or out of date, run `npm run db:generate`.
+
+## Demo data
+
+`prisma/seed.ts` clears the tables and loads a fixed data set, so every run gives the same starting
+point. It covers the cases a Registry team deals with every day:
+
+- students in every enrolment status
+- fees that are paid, part paid, overdue, and overpaid (credit)
+- assessments that are open and past deadline, with on-time and late submissions
+- grades in every classification, published and withheld
