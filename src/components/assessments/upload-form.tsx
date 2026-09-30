@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { useSubmit } from "@/hooks/use-submit";
 import { send } from "@/lib/client";
@@ -40,7 +41,7 @@ export function UploadForm({ assessmentId, replacing }: { assessmentId: string; 
         className="sm:max-w-xs"
       />
       <Button type="submit" size="sm" disabled={pending}>
-        <Upload /> {pending ? "Uploading..." : replacing ? "Replace file" : "Submit"}
+        {pending ? <Spinner /> : <Upload />} {pending ? "Uploading..." : replacing ? "Replace file" : "Submit"}
       </Button>
     </form>
   );

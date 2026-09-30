@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { useSearchPending } from "@/components/students/search-pending";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -14,12 +16,13 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
   const pathname = usePathname();
   const params = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
+  const { pending, start } = useSearchPending();
 
   function set(key: string, value: string) {
     const next = new URLSearchParams(params);
     if (value) next.set(key, value);
     else next.delete(key);
-    router.replace(`${pathname}?${next}`);
+    start(() => router.replace(`${pathname}?${next}`));
   }
 
   // Search as you type, after a short pause.
@@ -34,7 +37,11 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <div className="relative sm:max-w-xs sm:flex-1">
-        <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+        {pending ? (
+          <Spinner className="absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground" aria-label="Searching" />
+        ) : (
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+        )}
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -68,7 +75,7 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
           className="self-start sm:self-auto"
           onClick={() => {
             setQ("");
-            router.replace(pathname);
+            start(() => router.replace(pathname));
           }}
         >
           <X /> Clear

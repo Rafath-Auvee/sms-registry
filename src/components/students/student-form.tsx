@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { FormField } from "@/components/common/form-field";
@@ -27,7 +28,8 @@ export function StudentForm({ programmes, initial }: { programmes: { id: string;
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid max-w-2xl gap-4 sm:grid-cols-2" noValidate>
+    <form onSubmit={onSubmit} noValidate>
+      <fieldset disabled={pending} aria-busy={pending} className="grid max-w-2xl gap-4 disabled:opacity-80 sm:grid-cols-2">
       <div className="sm:col-span-2">
         <FormField label="Full name" htmlFor="fullName" error={error("fullName")}>
           <Input id="fullName" name="fullName" defaultValue={initial.fullName} autoComplete="off" aria-invalid={!!error("fullName")} />
@@ -54,12 +56,14 @@ export function StudentForm({ programmes, initial }: { programmes: { id: string;
       </FormField>
       <div className="flex gap-2 sm:col-span-2">
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving..." : editing ? "Save changes" : "Enrol student"}
+          {pending && <Spinner />}
+          {pending ? (editing ? "Saving..." : "Enrolling...") : editing ? "Save changes" : "Enrol student"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>
       </div>
+      </fieldset>
     </form>
   );
 }

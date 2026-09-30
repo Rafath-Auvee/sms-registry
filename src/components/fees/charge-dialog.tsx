@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/common/form-field";
@@ -36,7 +37,8 @@ export function ChargeDialog({ studentId, fee, year }: { studentId: string; fee:
           </FormField>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Charge fee"}
+              {pending && <Spinner />}
+              {pending ? "Charging..." : "Charge fee"}
             </Button>
           </DialogFooter>
         </form>

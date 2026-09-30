@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/common/form-field";
@@ -24,6 +25,7 @@ export function PublishControls({ studentId, name, overdue }: { studentId: strin
   return (
     <div className="flex flex-wrap gap-2">
       <Button size="sm" disabled={pending} onClick={() => submit(() => send(url, "POST", { publish: true }), `Results published to ${name}`)}>
+        {pending && <Spinner />}
         Publish
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -39,6 +41,7 @@ export function PublishControls({ studentId, name, overdue }: { studentId: strin
             </FormField>
             <DialogFooter>
               <Button type="submit" disabled={pending}>
+                {pending && <Spinner />}
                 {pending ? "Saving..." : "Withhold results"}
               </Button>
             </DialogFooter>

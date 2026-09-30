@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/common/form-field";
@@ -42,6 +43,7 @@ export function PaymentDialog({ studentId, balance }: { studentId: string; balan
           </FormField>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
+              {pending && <Spinner />}
               {pending ? "Saving..." : "Save payment"}
             </Button>
           </DialogFooter>

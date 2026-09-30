@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { StudentFilters } from "@/components/students/student-filters";
 import { StudentTable } from "@/components/students/student-table";
+import { PendingArea, SearchPendingProvider } from "@/components/students/search-pending";
 import { listProgrammes, listStudents } from "@/lib/queries";
 
 export default async function StudentsPage({ searchParams }: PageProps<"/staff/students">) {
@@ -21,12 +22,16 @@ export default async function StudentsPage({ searchParams }: PageProps<"/staff/s
           <Plus /> Enrol student
         </Button>
       </PageHeader>
-      <StudentFilters programmes={programmes} />
-      {students.length ? (
-        <StudentTable students={students} />
-      ) : (
-        <EmptyState icon={Users} title={filtered ? "No students match" : "No students yet"} description={filtered ? "Try a different search or clear the filters." : "Enrol the first student to get started."} />
-      )}
+      <SearchPendingProvider>
+        <StudentFilters programmes={programmes} />
+        <PendingArea>
+          {students.length ? (
+            <StudentTable students={students} />
+          ) : (
+            <EmptyState icon={Users} title={filtered ? "No students match" : "No students yet"} description={filtered ? "Try a different search or clear the filters." : "Enrol the first student to get started."} />
+          )}
+        </PendingArea>
+      </SearchPendingProvider>
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
@@ -60,7 +61,8 @@ export function AssessmentDialog({ programmes }: { programmes: Programme[] }) {
           </FormField>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Create assessment"}
+              {pending && <Spinner />}
+              {pending ? "Creating..." : "Create assessment"}
             </Button>
           </DialogFooter>
         </form>

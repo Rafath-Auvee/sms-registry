@@ -205,7 +205,7 @@ sms-registry/
 │   │   ├── assessments/       Assessment table, roster, upload form, submission badges
 │   │   ├── results/           Mark input, marksheet, publish and withhold controls
 │   │   ├── dashboard/         Overdue, late and deadline cards
-│   │   ├── landing/           Landing page sections
+│   │   ├── landing/           Landing page: hero, live numbers, feature bento, view picker
 │   │   └── motion/            anime.js: staggered reveal and counting numbers
 │   ├── hooks/
 │   │   └── use-submit.ts      Runs a request, shows a toast, keeps field errors, refreshes data
@@ -323,6 +323,12 @@ Choices behind it:
 - **Currency and time:** Bangladeshi Taka with lakh grouping (৳1,20,000.00), times in Bangladesh time.
 - **Motion:** light anime.js entrance and number animations, turned off for users who ask for reduced
   motion.
+- **Landing page:** Magic UI components (grid pattern, aurora text, shiny text, shimmer button),
+  installed with the shadcn CLI into `components/ui`. They are plain CSS and SVG, with no extra
+  animation library.
+- **Loading states:** buttons show a spinner and forms lock while saving; the student search shows a
+  spinner and dims the results until the new list arrives; pages show skeletons shaped like their
+  content.
 
 ## What I would build next
 

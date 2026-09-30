@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +50,7 @@ export function StatusDialog({ studentId, current }: { studentId: string; curren
           </FormField>
           <DialogFooter>
             <Button type="submit" disabled={pending}>
+              {pending && <Spinner />}
               {pending ? "Saving..." : "Save status"}
             </Button>
           </DialogFooter>
