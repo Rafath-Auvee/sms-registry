@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { money } from "@/lib/format";
+import { days, money } from "@/lib/format";
 import type { FeeSummary } from "@/lib/registry";
 
 type Row = { id: string; fullName: string; studentId: string; fees: FeeSummary };
@@ -30,7 +30,7 @@ export function OverdueCard({ students }: { students: Row[] }) {
                 </Link>
                 <div className="shrink-0 text-right">
                   <div className="font-medium text-red-600 tabular-nums dark:text-red-400">{money(s.fees.overduePoisha)}</div>
-                  <div className="text-xs text-muted-foreground">{s.fees.daysOverdue} days</div>
+                  <div className="text-xs text-muted-foreground">{days(s.fees.daysOverdue)}</div>
                 </div>
               </li>
             ))}

@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/common/form-field";
 import { useSubmit } from "@/hooks/use-submit";
 import { send } from "@/lib/client";
-import { isoDay } from "@/lib/format";
 
 // Assigns the programme fee for the student's academic year. Hidden once that year is charged.
 export function ChargeDialog({ studentId, fee, year }: { studentId: string; fee: string; year: string }) {
   const [open, setOpen] = useState(false);
   const { submit, pending, error } = useSubmit();
-  const [in30Days] = useState(() => isoDay(new Date(Date.now() + 30 * 86_400_000)));
+  const [in30Days] = useState(() => new Date(Date.now() + 30 * 86_400_000).toLocaleDateString("en-CA"));
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -12,6 +12,8 @@ export const GET = route(async (_req, { params }: RouteContext<"/api/submissions
     headers: {
       "Content-Type": s.mimeType,
       "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(s.fileName)}`,
+      "X-Content-Type-Options": "nosniff",
+      "Cache-Control": "private, no-store",
     },
   });
 });

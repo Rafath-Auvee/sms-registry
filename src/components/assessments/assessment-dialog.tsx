@@ -27,7 +27,7 @@ export function AssessmentDialog({ programmes }: { programmes: Programme[] }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button />}>
+      <DialogTrigger render={<Button disabled={!programmes.some((p) => p.modules.length)} />}>
         <Plus /> New assessment
       </DialogTrigger>
       <DialogContent>

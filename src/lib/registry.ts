@@ -34,7 +34,7 @@ export function feeSummary(
   for (const c of [...charges].sort((a, b) => +a.dueDate - +b.dueDate)) {
     const unpaid = Math.max(0, c.amountPoisha - credit);
     credit = Math.max(0, credit - c.amountPoisha);
-    if (unpaid > 0 && c.dueDate < startOfDay(today)) {
+    if (unpaid > 0 && c.dueDate < dhakaToday(today)) {
       overduePoisha += unpaid;
       oldestUnpaid ??= c.dueDate;
     }
@@ -44,12 +44,14 @@ export function feeSummary(
     paidPoisha,
     balancePoisha: chargedPoisha - paidPoisha,
     overduePoisha,
-    daysOverdue: oldestUnpaid ? Math.floor((+startOfDay(today) - +oldestUnpaid) / DAY) : 0,
+    daysOverdue: oldestUnpaid ? Math.round((+dhakaToday(today) - +oldestUnpaid) / DAY) : 0,
   };
 }
 
-function startOfDay(d: Date) {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+// Today's calendar date in Bangladesh, as UTC midnight (how @db.Date values are stored).
+// Using UTC here would move "today" six hours late: a payment made at 2am would be "in the future".
+export function dhakaToday(now = new Date()) {
+  return new Date(now.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" }));
 }
 
 export const isLate = (submittedAt: Date, deadline: Date) => submittedAt > deadline;
@@ -69,7 +71,8 @@ export function submissionBlock(
 // "2026/27" -> 2026. Student IDs use the cohort's start year.
 export const cohortYear = (academicYear: string) => Number(academicYear.slice(0, 4));
 
-export function currentAcademicYear(today = new Date()) {
+export function currentAcademicYear(now = new Date()) {
+  const today = dhakaToday(now);
   const y = today.getUTCMonth() >= 8 ? today.getUTCFullYear() : today.getUTCFullYear() - 1; // academic year starts in September
   return `${y}/${String((y + 1) % 100).padStart(2, "0")}`;
 }

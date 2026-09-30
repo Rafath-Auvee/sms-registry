@@ -2,10 +2,13 @@
 
 import { useRef } from "react";
 import { Upload } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSubmit } from "@/hooks/use-submit";
 import { send } from "@/lib/client";
+
+const MAX_BYTES = 10 * 1024 * 1024;
 
 export function UploadForm({ assessmentId, replacing }: { assessmentId: string; replacing: boolean }) {
   const { submit, pending } = useSubmit();
@@ -14,6 +17,11 @@ export function UploadForm({ assessmentId, replacing }: { assessmentId: string; 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
+    const file = data.get("file");
+    // Quick checks before uploading; the server checks again, including the file's contents.
+    if (!(file instanceof File) || !file.size) return void toast.error("Choose a file to upload.");
+    if (!/\.(pdf|docx)$/i.test(file.name)) return void toast.error("Upload a PDF or DOCX file.");
+    if (file.size > MAX_BYTES) return void toast.error("The file is over 10 MB.");
     submit(
       () => send<{ late: boolean; resubmitted: boolean }>(`/api/assessments/${assessmentId}/submission`, "POST", data),
       (r) => `${r.resubmitted ? "Resubmitted" : "Submitted"}${r.late ? ". It was after the deadline, so it's marked late." : ""}`,

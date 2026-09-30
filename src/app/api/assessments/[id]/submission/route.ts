@@ -1,4 +1,4 @@
-import { route, ok, requireStudent, ApiError } from "@/lib/api";
+import { route, ok, requireStudent, ApiError, readForm } from "@/lib/api";
 import { db } from "@/lib/db";
 import { isLate, submissionBlock } from "@/lib/registry";
 
@@ -13,7 +13,7 @@ const TYPES = {
 export const POST = route(async (req, { params }: RouteContext<"/api/assessments/[id]/submission">) => {
   const studentId = await requireStudent();
   const { id: assessmentId } = await params;
-  const file = (await req.formData()).get("file");
+  const file = (await readForm(req)).get("file");
   if (!(file instanceof File) || file.size === 0) throw new ApiError(400, "Choose a file to upload.");
   if (file.size > MAX_BYTES) throw new ApiError(400, "The file is over 10 MB.");
   const type = TYPES[file.name.split(".").pop()?.toLowerCase() as keyof typeof TYPES];
@@ -25,7 +25,8 @@ export const POST = route(async (req, { params }: RouteContext<"/api/assessments
     db.assessment.findUnique({ where: { id: assessmentId }, include: { module: { select: { programmeId: true } } } }),
     db.submission.findUnique({ where: { studentId_assessmentId: { studentId, assessmentId } }, select: { id: true } }),
   ]);
-  if (!student || !assessment) throw new ApiError(404, "Assessment not found.");
+  if (!student) throw new ApiError(404, "Student not found. Choose a student again from the switcher.");
+  if (!assessment) throw new ApiError(404, "Assessment not found.");
   if (student.programmeId !== assessment.module.programmeId) throw new ApiError(403, "This assessment is not on your programme.");
   const now = new Date();
   const blocked = submissionBlock(student.status, !!existing, assessment.deadline, now);

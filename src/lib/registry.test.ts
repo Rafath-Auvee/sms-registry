@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { classify, cohortYear, currentAcademicYear, feeSummary, isLate, submissionBlock } from "./registry";
+import { classify, cohortYear, currentAcademicYear, dhakaToday, feeSummary, isLate, submissionBlock } from "./registry";
 
 const d = (s: string) => new Date(s);
 
@@ -30,8 +30,8 @@ test("fees: paid, part paid, overdue, credit", () => {
 
 test("fees: not overdue on or before the due date", () => {
   const charge = { amountPoisha: 50_000, dueDate: d("2026-10-01") };
-  assert.equal(feeSummary([charge], [], d("2026-10-01T23:00:00Z")).overduePoisha, 0);
-  assert.equal(feeSummary([charge], [], d("2026-10-02")).daysOverdue, 1);
+  assert.equal(feeSummary([charge], [], d("2026-10-01T17:59:00Z")).overduePoisha, 0); // 23:59 in Dhaka
+  assert.equal(feeSummary([charge], [], d("2026-10-01T18:00:00Z")).daysOverdue, 1); // midnight in Dhaka
 });
 
 test("fees: payments settle the oldest charge first", () => {
@@ -62,4 +62,9 @@ test("academic year helpers", () => {
   assert.equal(currentAcademicYear(d("2026-09-01")), "2026/27");
   assert.equal(currentAcademicYear(d("2026-08-31")), "2025/26");
   assert.equal(currentAcademicYear(d("2099-12-01")), "2099/00");
+});
+
+test("today is the Bangladesh calendar date, not UTC", () => {
+  assert.equal(dhakaToday(d("2026-10-01T19:30:00Z")).toISOString().slice(0, 10), "2026-10-02"); // 01:30 in Dhaka
+  assert.equal(dhakaToday(d("2026-10-01T17:00:00Z")).toISOString().slice(0, 10), "2026-10-01");
 });

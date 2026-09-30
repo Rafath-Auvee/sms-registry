@@ -25,11 +25,16 @@ export const STATUS_LABEL: Record<EnrolmentStatus, string> = {
 export const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 export function lateBy(submittedAt: Date, deadline: Date) {
-  const mins = Math.round((+submittedAt - +deadline) / 60_000);
+  const mins = Math.max(1, Math.ceil((+submittedAt - +deadline) / 60_000));
   if (mins < 60) return `${mins} min late`;
   if (mins < 60 * 48) return `${Math.round(mins / 60)} h late`;
   return `${Math.round(mins / 1440)} days late`;
 }
+
+export const days = (n: number) => `${n} ${n === 1 ? "day" : "days"}`;
+
+// Today in the user's own timezone, for date inputs (toISOString would give the UTC date).
+export const localToday = () => new Date().toLocaleDateString("en-CA");
 
 export const fileSize = (bytes: number) =>
   bytes < 1024 * 1024 ? `${Math.ceil(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;

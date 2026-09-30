@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import { route, ok, ApiError } from "@/lib/api";
+import { route, ok, ApiError, readJson } from "@/lib/api";
 import { sessionInput } from "@/lib/schemas";
 import { db } from "@/lib/db";
 
 // The role toggle. A student view must point at a real student.
 export const POST = route(async (req) => {
-  const { role, studentId } = sessionInput.parse(await req.json());
+  const { role, studentId } = sessionInput.parse(await readJson(req));
   if (role === "student") {
     if (!studentId || !(await db.student.findUnique({ where: { id: studentId }, select: { id: true } })))
       throw new ApiError(400, "Choose a student to view as.");

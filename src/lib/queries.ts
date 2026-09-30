@@ -1,7 +1,22 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { feeSummary, isLate } from "@/lib/registry";
-import type { EnrolmentStatus, Prisma } from "@/generated/prisma/client";
+import { EnrolmentStatus, Prisma } from "@/generated/prisma/client";
+
+// Whether the database is usable, so pages can explain what to do instead of crashing.
+// "no-tables": migrations have not been run. "empty": tables exist but nothing is in them.
+export type DbState = "ready" | "empty" | "no-tables" | "unreachable";
+
+export async function dbState(): Promise<DbState> {
+  try {
+    const [programmes, students] = await Promise.all([db.programme.count(), db.student.count()]);
+    return programmes || students ? "ready" : "empty";
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2021") return "no-tables";
+    console.error(e);
+    return "unreachable";
+  }
+}
 
 const money = { charges: { select: { amountPoisha: true, dueDate: true } }, payments: { select: { amountPoisha: true } } };
 
@@ -19,7 +34,7 @@ export async function listStudents({ q, programme, status }: StudentFilters) {
       { email: { contains: q.trim(), mode: "insensitive" } },
     ];
   if (programme) where.programmeId = programme;
-  if (status) where.status = status as EnrolmentStatus;
+  if (status && status in EnrolmentStatus) where.status = status as EnrolmentStatus;
   const rows = await db.student.findMany({
     where,
     orderBy: { studentId: "asc" },

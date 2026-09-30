@@ -1,14 +1,19 @@
 import { z } from "zod";
 import { EnrolmentStatus } from "@/generated/prisma/enums";
+import { dhakaToday } from "@/lib/registry";
 
-const today = () => new Date(new Date().toISOString().slice(0, 10));
-const yearsAgo = (n: number) => new Date(today().setUTCFullYear(today().getUTCFullYear() - n));
+const yearsAgo = (n: number) => {
+  const d = dhakaToday();
+  d.setUTCFullYear(d.getUTCFullYear() - n);
+  return d;
+};
 
 // "2026/27": second year must follow the first.
 const academicYear = z
   .string()
   .regex(/^\d{4}\/\d{2}$/, "Use the format 2026/27")
-  .refine((v) => (Number(v.slice(0, 4)) + 1) % 100 === Number(v.slice(5)), "The second year must follow the first");
+  .refine((v) => (Number(v.slice(0, 4)) + 1) % 100 === Number(v.slice(5)), "The second year must follow the first")
+  .refine((v) => Math.abs(Number(v.slice(0, 4)) - dhakaToday().getUTCFullYear()) <= 10, "Check the academic year");
 
 export const studentInput = z.object({
   fullName: z.string().trim().min(2, "Enter the full name").max(100),
@@ -41,7 +46,7 @@ const taka = z.coerce
 
 export const paymentInput = z.object({
   amount: taka,
-  paidOn: z.coerce.date({ error: "Enter the payment date" }).refine((d) => d <= today(), "Payment date can't be in the future"),
+  paidOn: z.coerce.date({ error: "Enter the payment date" }).refine((d) => d <= dhakaToday(), "Payment date can't be in the future"),
   reference: z.string().trim().toUpperCase().min(3, "Enter the payment reference").max(50),
 });
 
@@ -52,7 +57,7 @@ export const chargeInput = z.object({
 export const assessmentInput = z.object({
   title: z.string().trim().min(3, "Enter a title").max(120),
   moduleId: z.string().min(1, "Choose a module"),
-  deadline: z.coerce.date({ error: "Enter a deadline" }),
+  deadline: z.coerce.date({ error: "Enter a deadline" }).refine((d) => d > new Date(), "The deadline must be in the future"),
 });
 
 export const gradeInput = z.object({

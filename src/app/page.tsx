@@ -1,12 +1,16 @@
+import { connection } from "next/server";
 import { School } from "lucide-react";
 import { EnterCards } from "@/components/landing/enter-cards";
 import { WorkflowGrid } from "@/components/landing/workflow-grid";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Reveal } from "@/components/motion/reveal";
-import { studentOptions } from "@/lib/queries";
+import { dbState, studentOptions } from "@/lib/queries";
+import { SetupNotice } from "@/components/common/setup-notice";
 
 export default async function LandingPage() {
-  const students = await studentOptions();
+  await connection(); // render per request: the student list and database state change at runtime
+  const state = await dbState();
+  const students = state === "ready" ? await studentOptions() : [];
   return (
     <div className="relative flex min-h-svh flex-col overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-40 -z-10 mx-auto h-96 max-w-3xl rounded-full bg-primary/25 blur-3xl" />
@@ -29,7 +33,7 @@ export default async function LandingPage() {
             view to start; you can switch at any time from the top bar.
           </p>
         </section>
-        <EnterCards students={students} />
+        {state === "ready" ? <EnterCards students={students} /> : <SetupNotice state={state} />}
         <section className="space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground">What it covers</h2>
           <WorkflowGrid />

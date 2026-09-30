@@ -3,8 +3,10 @@ import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { getSession, type Role } from "@/lib/session";
 
+type Fields = Record<string, string[]>;
+
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(public status: number, message: string, public fields?: Fields) {
     super(message);
   }
 }
@@ -17,7 +19,7 @@ export function route<C>(fn: Handler<C>): Handler<C> {
     try {
       return await fn(req, ctx);
     } catch (e) {
-      if (e instanceof ApiError) return NextResponse.json({ error: e.message }, { status: e.status });
+      if (e instanceof ApiError) return NextResponse.json({ error: e.message, fields: e.fields }, { status: e.status });
       if (e instanceof z.ZodError)
         return NextResponse.json(
           { error: e.issues[0]?.message ?? "Invalid input", fields: z.flattenError(e).fieldErrors },
@@ -26,11 +28,33 @@ export function route<C>(fn: Handler<C>): Handler<C> {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === "P2002") return NextResponse.json({ error: "That record already exists." }, { status: 409 });
         if (e.code === "P2025") return NextResponse.json({ error: "Not found." }, { status: 404 });
+        if (e.code === "P2021")
+          return NextResponse.json({ error: "The database has no tables yet. Run `npm run setup`." }, { status: 503 });
       }
+      // P1001/P1002: can't reach or timed out (with the pg adapter these arrive as known request errors).
+      const unreachable = e instanceof Prisma.PrismaClientKnownRequestError && (e.code === "P1001" || e.code === "P1002");
+      if (unreachable || e instanceof Prisma.PrismaClientInitializationError)
+        return NextResponse.json({ error: "The database is not reachable right now. Please try again." }, { status: 503 });
       console.error(e);
       return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
     }
   };
+}
+
+export async function readJson(req: Request): Promise<unknown> {
+  try {
+    return await req.json();
+  } catch {
+    throw new ApiError(400, "The request body must be valid JSON.");
+  }
+}
+
+export async function readForm(req: Request) {
+  try {
+    return await req.formData();
+  } catch {
+    throw new ApiError(400, "Send the file as multipart form data.");
+  }
 }
 
 export async function requireRole(role: Role) {
@@ -47,3 +71,16 @@ export async function requireStudent() {
 }
 
 export const ok = (data: unknown, status = 200) => NextResponse.json(data, { status });
+
+// Retries a transaction that lost a race on a unique key (for example two enrolments creating
+// the first ID counter row of a year at the same moment).
+export async function retryOnConflict<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  for (let i = 1; ; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const conflict = e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
+      if (!conflict || i >= attempts) throw e;
+    }
+  }
+}

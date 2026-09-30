@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/common/form-field";
 import { useSubmit } from "@/hooks/use-submit";
 import { send } from "@/lib/client";
-import { isoDay } from "@/lib/format";
+import { localToday } from "@/lib/format";
 
 export function PaymentDialog({ studentId, balance }: { studentId: string; balance: string }) {
   const [open, setOpen] = useState(false);
@@ -35,7 +35,7 @@ export function PaymentDialog({ studentId, balance }: { studentId: string; balan
             <Input id="amount" name="amount" type="number" inputMode="decimal" step="0.01" min="0.01" />
           </FormField>
           <FormField label="Date received" htmlFor="paidOn" error={error("paidOn")}>
-            <Input id="paidOn" name="paidOn" type="date" defaultValue={isoDay(new Date())} max={isoDay(new Date())} />
+            <Input id="paidOn" name="paidOn" type="date" defaultValue={localToday()} max={localToday()} />
           </FormField>
           <FormField label="Reference" htmlFor="reference" error={error("reference")} hint="Bank or receipt reference. Each can be used once.">
             <Input id="reference" name="reference" autoComplete="off" />

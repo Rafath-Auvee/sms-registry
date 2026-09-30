@@ -11,6 +11,6 @@ export default defineConfig({
   },
   datasource: {
     // Migrations need a direct connection; Neon's pooled URL can break them. Falls back for plain Postgres.
-    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
+    url: process.env["DIRECT_URL"] || process.env["DATABASE_URL"],
   },
 });

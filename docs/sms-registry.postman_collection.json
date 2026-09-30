@@ -1,0 +1,1007 @@
+{
+  "info": {
+    "name": "SMS Registry API",
+    "description": "All endpoints of the SMS Registry. Run the app (npm run dev) and the seed first. Requests pass the role in a Cookie header: 'role=staff', or 'role=student; sid=<student id>'. List requests save ids into collection variables, so run each folder top to bottom. See docs/API.md for the full reference.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "programmeId",
+      "value": ""
+    },
+    {
+      "key": "moduleId",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": ""
+    },
+    {
+      "key": "newStudentId",
+      "value": ""
+    },
+    {
+      "key": "assessmentId",
+      "value": ""
+    },
+    {
+      "key": "submissionId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Reference data",
+      "item": [
+        {
+          "name": "List programmes and modules",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/programmes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "programmes"
+              ]
+            },
+            "description": "Programmes with their modules. Saves programmeId and moduleId (first ones)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const j = pm.response.json(); pm.collectionVariables.set('programmeId', j[0].id); pm.collectionVariables.set('moduleId', j[0].modules[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Load demo data (empty database only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/demo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "demo"
+              ]
+            },
+            "description": "Loads the demo data only when the database has no programmes and no students. Returns 409 otherwise."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Students",
+      "item": [
+        {
+          "name": "List students",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students?q=&programme=&status=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": ""
+                },
+                {
+                  "key": "programme",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Filters are optional. status is ENROLLED, DEFERRED, WITHDRAWN or COMPLETED. Saves the first student's id as studentId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) { const j = pm.response.json(); pm.collectionVariables.set('studentId', j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search students (\"omar\")",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students?q=omar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "omar"
+                }
+              ]
+            },
+            "description": "Search by name, Student ID or email. Saves Omar's id as studentId (used by the student view requests)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) { const j = pm.response.json(); pm.collectionVariables.set('studentId', j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get one student",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}"
+              ]
+            },
+            "description": "Full record: status history, charges, payments, submissions (no file bytes), grades, and a fee summary."
+          }
+        },
+        {
+          "name": "Enrol a student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "Creates the student and generates the Student ID (SMS-YYYY-NNNN). Saves the new id as newStudentId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nadia Rahman\",\n  \"email\": \"nadia.rahman@example.ac.uk\",\n  \"dateOfBirth\": \"2006-05-20\",\n  \"programmeId\": \"{{programmeId}}\",\n  \"academicYear\": \"2026/27\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) { const j = pm.response.json(); pm.collectionVariables.set('newStudentId', j.id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Edit a student",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{newStudentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{newStudentId}}"
+              ]
+            },
+            "description": "Send every field. The Student ID never changes. Changing programme is refused once the student has coursework.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Nadia Rahman\",\n  \"email\": \"nadia.r@example.ac.uk\",\n  \"dateOfBirth\": \"2006-05-20\",\n  \"programmeId\": \"{{programmeId}}\",\n  \"academicYear\": \"2026/27\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Change status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{newStudentId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{newStudentId}}",
+                "status"
+              ]
+            },
+            "description": "A reason is required for WITHDRAWN, DEFERRED, and when reinstating a withdrawn or completed student.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DEFERRED\",\n  \"reason\": \"Family reasons, returning next year\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Fees and payments",
+      "item": [
+        {
+          "name": "Charge the programme fee",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/charges",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "charges"
+              ]
+            },
+            "description": "Charges the programme's current fee for the student's academic year. Once per year; enrolled students only.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dueDate\": \"2026-12-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Record a payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "payments"
+              ]
+            },
+            "description": "amount is in taka (up to 2 decimals). paidOn can't be in the future. reference must be unique. Overpayment becomes credit.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"15000.00\",\n  \"paidOn\": \"2026-09-30\",\n  \"reference\": \"TRX-POSTMAN-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Assessments and marks",
+      "item": [
+        {
+          "name": "List assessments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/assessments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "assessments"
+              ]
+            },
+            "description": "Saves the first assessment's id as assessmentId."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 300) { const j = pm.response.json(); pm.collectionVariables.set('assessmentId', j[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get one assessment (roster)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/assessments/{{assessmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "assessments",
+                "{{assessmentId}}"
+              ]
+            },
+            "description": "Every student on the module's programme with their submission and grade."
+          }
+        },
+        {
+          "name": "Create an assessment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/assessments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "assessments"
+              ]
+            },
+            "description": "deadline is an ISO date-time and must be in the future (11:00Z is 17:00 in Dhaka).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Coursework 2: Case study\",\n  \"moduleId\": \"{{moduleId}}\",\n  \"deadline\": \"2026-12-15T11:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Enter or change a mark",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/grades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "grades"
+              ]
+            },
+            "description": "Whole number 0 to 100. The student must be on the assessment's programme. New marks start unpublished.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"assessmentId\": \"{{assessmentId}}\",\n  \"mark\": 64\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove a mark",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/grades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "grades"
+              ]
+            },
+            "description": "Removes a mark entered by mistake.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"assessmentId\": \"{{assessmentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Publish a student's results",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/results",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "results"
+              ]
+            },
+            "description": "Makes all of this student's marks visible to them.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publish\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Withhold a student's results",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/results",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "results"
+              ]
+            },
+            "description": "Hides the marks; the student sees the reason instead.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publish\": false,\n  \"reason\": \"Outstanding tuition fees. Please contact the Registry.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Download a submission file",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/submissions/{{submissionId}}/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "submissions",
+                "{{submissionId}}",
+                "file"
+              ]
+            },
+            "description": "Set submissionId from a submission id in Get one assessment. Staff can download any file; a student only their own."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Student view",
+      "item": [
+        {
+          "name": "Switch to student view",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "session"
+              ]
+            },
+            "description": "What the UI's switcher calls: sets the role and sid cookies. The requests below send the Cookie header directly, so this is optional here.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"student\",\n  \"studentId\": \"{{studentId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "My record (published marks only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=student; sid={{studentId}}",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "me"
+              ]
+            },
+            "description": "Profile, fees and results. mark is null unless published; status is published, withheld or pending."
+          }
+        },
+        {
+          "name": "Upload or replace my file",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=student; sid={{studentId}}",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/assessments/{{assessmentId}}/submission",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "assessments",
+                "{{assessmentId}}",
+                "submission"
+              ]
+            },
+            "description": "Body: form-data with a file field. Refused after the deadline if already submitted; a first late submission is accepted and marked late.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Choose a .pdf or .docx, up to 10 MB"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Switch back to staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "session"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"staff\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Error examples",
+      "item": [
+        {
+          "name": "403: student calls a staff endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=student; sid={{studentId}}",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "400: malformed JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "Body is not valid JSON.",
+            "body": {
+              "mode": "raw",
+              "raw": "{ this is not json"
+            }
+          }
+        },
+        {
+          "name": "400: field errors",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"\",\n  \"email\": \"not-an-email\",\n  \"dateOfBirth\": \"2020-01-01\",\n  \"programmeId\": \"\",\n  \"academicYear\": \"2026/28\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "409: duplicate payment reference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "{{studentId}}",
+                "payments"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": \"1\",\n  \"paidOn\": \"2026-09-01\",\n  \"reference\": \"TRX-POSTMAN-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "404: unknown student",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "role=staff",
+                "description": "Which view is calling: staff, or a student by id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/does-not-exist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "students",
+                "does-not-exist"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    }
+  ]
+}

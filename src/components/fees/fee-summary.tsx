@@ -1,4 +1,4 @@
-import { money } from "@/lib/format";
+import { days, money } from "@/lib/format";
 import type { FeeSummary } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
@@ -12,7 +12,7 @@ export function FeeSummaryGrid({ fees }: { fees: FeeSummary }) {
     {
       label: "Overdue",
       value: fees.overduePoisha ? `${money(fees.overduePoisha)}` : "None",
-      hint: fees.overduePoisha ? `${fees.daysOverdue} days past due` : undefined,
+      hint: fees.overduePoisha ? `${days(fees.daysOverdue)} past due` : undefined,
       tone: fees.overduePoisha ? "text-red-600 dark:text-red-400" : "",
     },
   ];

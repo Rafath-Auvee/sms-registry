@@ -1,4 +1,4 @@
-import { route, ok, requireRole, ApiError } from "@/lib/api";
+import { route, ok, requireRole, ApiError, readJson } from "@/lib/api";
 import { resultsInput } from "@/lib/schemas";
 import { db } from "@/lib/db";
 
@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 export const POST = route(async (req, { params }: RouteContext<"/api/students/[id]/results">) => {
   await requireRole("staff");
   const { id } = await params;
-  const { publish, reason } = resultsInput.parse(await req.json());
+  const { publish, reason } = resultsInput.parse(await readJson(req));
   const { count } = await db.grade.updateMany({
     where: { studentId: id },
     data: publish ? { published: true, withheldReason: null } : { published: false, withheldReason: reason },
