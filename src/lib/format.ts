@@ -8,6 +8,10 @@ export const money = (poisha: number) => bdt.format(poisha / 100);
 const day = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 export const date = (d: Date) => day.format(d);
 
+// The calendar date of a moment (for example when a record was created), in Bangladesh time.
+const dhakaDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Dhaka" });
+export const dateOf = (d: Date) => dhakaDay.format(d);
+
 // Deadlines and submission times are moments; show them in Bangladesh time.
 const moment = new Intl.DateTimeFormat("en-GB", {
   day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Dhaka",

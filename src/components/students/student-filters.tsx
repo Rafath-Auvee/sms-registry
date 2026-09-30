@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { useSearchPending } from "@/components/students/search-pending";
@@ -16,10 +16,12 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
   const pathname = usePathname();
   const params = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
+  // Set by Clear so the typing delay below doesn't re-apply the old filters mid-navigation.
+  const cleared = useRef(false);
   const { pending, start } = useSearchPending();
 
   function set(key: string, value: string) {
-    const next = new URLSearchParams(params);
+    const next = new URLSearchParams(window.location.search);
     if (value) next.set(key, value);
     else next.delete(key);
     start(() => router.replace(`${pathname}?${next}`));
@@ -27,6 +29,10 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
 
   // Search as you type, after a short pause.
   useEffect(() => {
+    if (cleared.current) {
+      cleared.current = false;
+      return;
+    }
     if (q === (params.get("q") ?? "")) return;
     const t = setTimeout(() => set("q", q.trim()), 300);
     return () => clearTimeout(t);
@@ -74,6 +80,7 @@ export function StudentFilters({ programmes }: { programmes: { id: string; code:
           size="sm"
           className="self-start sm:self-auto"
           onClick={() => {
+            cleared.current = true;
             setQ("");
             start(() => router.replace(pathname));
           }}

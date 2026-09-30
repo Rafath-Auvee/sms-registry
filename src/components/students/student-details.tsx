@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { date } from "@/lib/format";
+import { date, dateOf } from "@/lib/format";
 
 type Student = {
   studentId: string;
@@ -17,7 +17,7 @@ export function StudentDetails({ student }: { student: Student }) {
     ["Date of birth", date(student.dateOfBirth)],
     ["Programme", `${student.programme.code}: ${student.programme.name}`],
     ["Academic year", student.academicYear],
-    ["Record created", date(student.createdAt)],
+    ["Record created", dateOf(student.createdAt)],
   ];
   return (
     <Card>

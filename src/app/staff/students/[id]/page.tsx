@@ -42,7 +42,7 @@ export default async function StudentPage({ params, searchParams }: PageProps<"/
       </PageHeader>
 
       <Tabs defaultValue={tab}>
-        <TabsList className="w-full overflow-x-auto sm:w-fit">
+        <TabsList className="max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="fees">Fees</TabsTrigger>
           <TabsTrigger value="submissions">Submissions</TabsTrigger>

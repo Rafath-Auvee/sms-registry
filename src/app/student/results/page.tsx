@@ -18,6 +18,7 @@ export default async function MyResultsPage() {
     title: g.assessment.title,
     module: `${g.assessment.module.code} ${g.assessment.module.title}`,
     mark: g.published ? g.mark : null,
+    withheld: !g.published && !!g.withheldReason,
   }));
   const withheld = grades.find((g) => g.withheldReason)?.withheldReason ?? null;
 

@@ -4,7 +4,7 @@ import { ClassificationBadge } from "@/components/results/result-badges";
 
 // What a student sees. The page passes a mark only for published results, so an unpublished
 // mark never reaches the browser.
-export type MarksheetRow = { id: string; title: string; module: string; mark: number | null };
+export type MarksheetRow = { id: string; title: string; module: string; mark: number | null; withheld: boolean };
 
 export function Marksheet({ rows, withheldReason }: { rows: MarksheetRow[]; withheldReason: string | null }) {
   return (
@@ -40,9 +40,13 @@ export function Marksheet({ rows, withheldReason }: { rows: MarksheetRow[]; with
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">{r.mark ?? "Pending"}</TableCell>
+                  <TableCell className="text-right font-medium tabular-nums">{r.mark ?? (r.withheld ? "Withheld" : "Pending")}</TableCell>
                   <TableCell className="hidden sm:table-cell">
-                    {r.mark === null ? <span className="text-sm text-muted-foreground">Awaiting publication</span> : <ClassificationBadge mark={r.mark} />}
+                    {r.mark === null ? (
+                      <span className="text-sm text-muted-foreground">{r.withheld ? "Held by the Registry" : "Awaiting publication"}</span>
+                    ) : (
+                      <ClassificationBadge mark={r.mark} />
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

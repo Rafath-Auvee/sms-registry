@@ -23,7 +23,8 @@ export function StudentForm({ programmes, initial }: { programmes: { id: string;
     submit(
       () => send<{ id: string; studentId: string }>(editing ? `/api/students/${initial.id}` : "/api/students", editing ? "PATCH" : "POST", body),
       (s) => (editing ? "Student updated" : `Enrolled as ${s.studentId}`),
-      (s) => router.push(`/staff/students/${s.id}`),
+      undefined,
+      (s) => `/staff/students/${s.id}`,
     );
   }
 
