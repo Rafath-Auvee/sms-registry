@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EnrolmentStatus {
+  ENROLLED
+  DEFERRED
+  WITHDRAWN
+  COMPLETED
+}
+
+model Programme {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  name           String
+  annualFeePence Int // current price; charges copy it so later price changes don't rewrite history
+  modules        Module[]
+  students       Student[]
+  createdAt      DateTime  @default(now())
+}
+
+model Module {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  title       String
+  programme   Programme    @relation(fields: [programmeId], references: [id])
+  programmeId String
+  assessments Assessment[]
+}
+
+model Student {
+  id            String          @id @default(cuid())
+  studentId     String          @unique // SMS-2026-0001, from IdCounter, never reused
+  fullName      String
+  email         String          @unique
+  dateOfBirth   DateTime        @db.Date
+  programme     Programme       @relation(fields: [programmeId], references: [id])
+  programmeId   String
+  academicYear  String // "2026/27"
+  status        EnrolmentStatus @default(ENROLLED)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  statusChanges StatusChange[]
+  charges       FeeCharge[]
+  payments      Payment[]
+  submissions   Submission[]
+  grades        Grade[]
+
+  @@index([fullName])
+  @@index([programmeId, status])
+}
+
+// Per-year sequence for student IDs, incremented inside the create transaction.
+model IdCounter {
+  year Int @id
+  last Int @default(0)
+}
+
+model StatusChange {
+  id        String           @id @default(cuid())
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  from      EnrolmentStatus?
+  to        EnrolmentStatus
+  reason    String?
+  changedAt DateTime         @default(now())
+
+  @@index([studentId])
+}
+
+model FeeCharge {
+  id           String   @id @default(cuid())
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    String
+  academicYear String
+  description  String
+  amountPence  Int
+  dueDate      DateTime @db.Date
+  createdAt    DateTime @default(now())
+
+  @@unique([studentId, academicYear])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   String
+  amountPence Int
+  paidOn      DateTime @db.Date
+  reference   String   @unique // blocks recording the same payment twice
+  createdAt   DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model Assessment {
+  id          String       @id @default(cuid())
+  title       String
+  module      Module       @relation(fields: [moduleId], references: [id])
+  moduleId    String
+  deadline    DateTime
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+  grades      Grade[]
+}
+
+// One row per student per assessment; a resubmission replaces the file and bumps version.
+// Lateness is derived (submittedAt > deadline) so a deadline extension is reflected automatically.
+model Submission {
+  id           String     @id @default(cuid())
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId    String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  assessmentId String
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  data         Bytes
+  submittedAt  DateTime
+  version      Int        @default(1)
+
+  @@unique([studentId, assessmentId])
+}
+
+// Classification is derived from mark: Fail < 40, Pass, Merit >= 60, Distinction >= 70.
+model Grade {
+  id             String     @id @default(cuid())
+  student        Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  assessment     Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  assessmentId   String
+  mark           Int // 0 to 100, checked in the API
+  published      Boolean    @default(false)
+  withheldReason String?
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([studentId, assessmentId])
+}
