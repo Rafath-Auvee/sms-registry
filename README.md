@@ -45,7 +45,8 @@ data, so the app opens with students, fees, submissions and grades already in pl
 
 | Variable | Example | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://sms:sms@localhost:5432/sms_registry` | PostgreSQL connection string. The example matches `docker-compose.yml` (option B). |
+| `DATABASE_URL` | `postgresql://sms:sms@localhost:5432/sms_registry` | Connection the app uses. The example matches `docker-compose.yml` (option B). On Neon, use the pooled URL (host contains `-pooler`). |
+| `DIRECT_URL` | `postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require` | Optional. Direct, non-pooled URL for Prisma migrations. Needed on Neon; leave unset for plain Postgres and `DATABASE_URL` is used. |
 
 ## Database commands
 
