@@ -7,7 +7,9 @@ The Registry module of a Student Management System: the four workflows a Registr
 3. **Assessment submission:** PDF or DOCX uploads, resubmission before the deadline, late work flagged.
 4. **Marksheet and results:** marks, classification, publish or withhold per student.
 
-Built with Next.js 16 (App Router), PostgreSQL, Prisma 7, Tailwind CSS and shadcn/ui.
+Built with Next.js 16 (App Router), PostgreSQL, Prisma 7, Tailwind CSS and shadcn/ui, with
+[anime.js](https://animejs.com) for motion and landing page components chosen from
+[21st.dev](https://21st.dev).
 
 ## Contents
 
@@ -321,11 +323,16 @@ Choices behind it:
 - **Native HTML where it's enough:** date inputs, a native select (styled by shadcn), link based filter
   tabs that keep filters in the URL.
 - **Currency and time:** Bangladeshi Taka with lakh grouping (৳1,20,000.00), times in Bangladesh time.
-- **Motion:** light anime.js entrance and number animations, turned off for users who ask for reduced
-  motion.
-- **Landing page:** Magic UI components (grid pattern, aurora text, shiny text, shimmer button),
-  installed with the shadcn CLI into `components/ui`. They are plain CSS and SVG, with no extra
-  animation library.
+- **Motion with [anime.js](https://animejs.com):** I added anime.js for the entrance animations
+  (cards and sections fade in one after another) and the dashboard numbers that count up. It lives in
+  two small components, `components/motion/reveal.tsx` and `components/motion/count-up.tsx`, and is
+  turned off for users who ask for reduced motion.
+- **Landing page components from [21st.dev](https://21st.dev):** I picked the landing page components
+  on 21st.dev, the community catalogue of shadcn compatible components: grid pattern, aurora text,
+  animated shiny text and shimmer button. 21st.dev's installer needs an account key, so they are
+  installed from their original open source registry, [Magic UI](https://magicui.design), with the
+  shadcn CLI (`npx shadcn add https://magicui.design/r/<name>.json`) into `components/ui`. They are
+  plain CSS and SVG, with no extra animation library.
 - **Loading states:** buttons show a spinner and forms lock while saving; the student search shows a
   spinner and dims the results until the new list arrives; pages show skeletons shaped like their
   content.
@@ -359,7 +366,9 @@ throughout.
 
 **Decisions I made**
 - Neon over Docker, so the database needs no local setup; Docker kept as an option.
-- Bangladeshi Taka and Bangladesh time; dark theme by default; a landing page; anime.js for motion.
+- Bangladeshi Taka and Bangladesh time; dark theme by default; a landing page.
+- anime.js for motion, and landing page components from 21st.dev, so the UI doesn't look like stock
+  shadcn.
 - Components split by feature, with no single page holding a large UI.
 - Keeping the role toggle instead of building login, as the brief allows.
 - An API reference and a Postman collection, and graceful handling of an empty database.
