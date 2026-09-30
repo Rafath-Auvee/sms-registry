@@ -59,6 +59,8 @@ data, so the app opens with students, fees, submissions and grades already in pl
 | `npm run db:seed` | Load the demo data (`prisma/seed.ts`); safe to run again |
 | `npm run db:reset` | Drop everything, re-apply all migrations and reload the demo data |
 
+Run the rule tests (classification, fees and overdue, late and resubmission rules) with `npm test`.
+
 `src/generated/prisma` is not committed. It is rebuilt from the schema by `npm install` or
 `npm run db:generate`; if it is missing or out of date, run `npm run db:generate`.
 

@@ -18,7 +18,7 @@ model Programme {
   id             String    @id @default(cuid())
   code           String    @unique
   name           String
-  annualFeePence Int // current price; charges copy it so later price changes don't rewrite history
+  annualFeePoisha Int // current price; charges copy it so later price changes don't rewrite history
   modules        Module[]
   students       Student[]
   createdAt      DateTime  @default(now())
@@ -79,7 +79,7 @@ model FeeCharge {
   studentId    String
   academicYear String
   description  String
-  amountPence  Int
+  amountPoisha  Int
   dueDate      DateTime @db.Date
   createdAt    DateTime @default(now())
 
@@ -90,7 +90,7 @@ model Payment {
   id          String   @id @default(cuid())
   student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   studentId   String
-  amountPence Int
+  amountPoisha Int
   paidOn      DateTime @db.Date
   reference   String   @unique // blocks recording the same payment twice
   createdAt   DateTime @default(now())
