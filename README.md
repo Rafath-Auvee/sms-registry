@@ -207,7 +207,7 @@ sms-registry/
 │   │   ├── assessments/       Assessment table, roster, upload form, submission badges
 │   │   ├── results/           Mark input, marksheet, publish and withhold controls
 │   │   ├── dashboard/         Overdue, late and deadline cards
-│   │   ├── landing/           Landing page: hero, live numbers, feature bento, view picker
+│   │   ├── landing/           Landing page: header, hero with live dashboard preview, sections, footer
 │   │   └── motion/            anime.js: staggered reveal and counting numbers
 │   ├── hooks/
 │   │   └── use-submit.ts      Runs a request, shows a toast, keeps field errors, refreshes data
@@ -328,11 +328,12 @@ Choices behind it:
   two small components, `components/motion/reveal.tsx` and `components/motion/count-up.tsx`, and is
   turned off for users who ask for reduced motion.
 - **Landing page components from [21st.dev](https://21st.dev):** I picked the landing page components
-  on 21st.dev, the community catalogue of shadcn compatible components: grid pattern, aurora text,
-  animated shiny text and shimmer button. 21st.dev's installer needs an account key, so they are
+  on 21st.dev, the community catalogue of shadcn compatible components: grid pattern, animated shiny
+  text and shimmer button. 21st.dev's installer needs an account key, so they are
   installed from their original open source registry, [Magic UI](https://magicui.design), with the
   shadcn CLI (`npx shadcn add https://magicui.design/r/<name>.json`) into `components/ui`. They are
-  plain CSS and SVG, with no extra animation library.
+  plain CSS and SVG, with no extra animation library. The page itself is a split hero with a live
+  preview of the dashboard (real data), the four workflows, how it works, and the view picker.
 - **Loading states:** buttons show a spinner and forms lock while saving; the student search shows a
   spinner and dims the results until the new list arrives; pages show skeletons shaped like their
   content.

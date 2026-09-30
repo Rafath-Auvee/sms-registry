@@ -18,7 +18,8 @@ export function CountUp({ value, currency }: { value: number; currency?: boolean
       duration: 900,
       ease: "outExpo",
       onUpdate: () => {
-        el.textContent = format(state.n);
+        // Count money in whole taka so no stray poisha flicker past; the final value is exact.
+        el.textContent = format(currency && state.n < value ? Math.floor(state.n / 100) * 100 : state.n);
       },
     });
     return () => {
