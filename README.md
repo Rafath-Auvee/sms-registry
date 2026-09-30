@@ -15,6 +15,7 @@ Built with Next.js 16 (App Router), PostgreSQL, Prisma 7, Tailwind CSS and shadc
 
 - [Run it locally](#run-it-locally)
 - [Environment variables](#environment-variables)
+- [How I used AI](#how-i-used-ai)
 - [Commands](#commands)
 - [Using the app](#using-the-app)
 - [Demo data](#demo-data)
@@ -25,7 +26,6 @@ Built with Next.js 16 (App Router), PostgreSQL, Prisma 7, Tailwind CSS and shadc
 - [Error handling](#error-handling)
 - [Decisions and trade offs](#decisions-and-trade-offs)
 - [What I would build next](#what-i-would-build-next)
-- [How I used AI](#how-i-used-ai)
 
 ## Run it locally
 
@@ -80,6 +80,24 @@ command to run. On an empty database it offers a **Load demo data** button.
 |---|---|---|
 | `DATABASE_URL` | yes | Connection the app uses. On Neon, the pooled URL (host contains `-pooler`). |
 | `DIRECT_URL` | Neon only | Direct, non pooled URL for Prisma migrations. Leave it out (or empty) for plain Postgres and `DATABASE_URL` is used. |
+
+## How I used AI
+
+I built this with **Claude Code** (Anthropic's coding assistant, in the terminal) as a pair
+programmer.
+
+- **What it did:** turned the brief into a plan, proposed the data model, wrote most of the code
+  (schema, API routes, validation, UI, demo data, tests), and tested its own work with real API
+  requests and a headless browser at desktop and phone widths.
+- **What I decided:** the registry rules in the data model (fees copied onto charges, nothing
+  deleted, a status history), Neon as the database, Taka and Dhaka time, the dark theme and landing
+  page (anime.js, components from 21st.dev), the role toggle instead of login, and the API docs.
+- **What I corrected:** "today" was computed in UTC, so payments made after midnight in Bangladesh
+  were refused as future dated (fixed, with a test); deferred and withdrawn students were counted as
+  missing submissions; the landing page was built as a static page and showed stale data; a Prisma
+  release candidate was installed next to the stable client.
+- **How I checked it:** I reviewed every change, ran the lint, type check, tests and build, and
+  clicked through both views before submitting.
 
 ## Commands
 
@@ -347,41 +365,3 @@ Choices behind it:
 - Deadline extensions per student, for mitigating circumstances.
 - Files in object storage (S3 or R2) with virus scanning.
 - Bulk mark upload from CSV, and CSV export for finance.
-
-## How I used AI
-
-> Draft: to be reviewed and edited so it matches exactly how I worked.
-
-I used **Claude Code** (Anthropic's coding assistant, in the terminal) as a pair programmer
-throughout.
-
-**What I asked it to do**
-- Read the brief and turn it into a checklist and a plan, which I then cut down to a one to two day
-  build.
-- Propose the data model, which I reviewed against how a registry office actually works (fees copied
-  onto charges, nothing deleted, status history).
-- Write most of the code: schema, API routes, validation, pages and components, demo data and tests.
-- Test its own work: it drove the API with real requests for every rule above, checked each page in a
-  headless browser at desktop and phone widths, and ran the app against an empty database, a database
-  with no tables and an unreachable one.
-
-**Decisions I made**
-- Neon over Docker, so the database needs no local setup; Docker kept as an option.
-- Bangladeshi Taka and Bangladesh time; dark theme by default; a landing page.
-- anime.js for motion, and landing page components from 21st.dev, so the UI doesn't look like stock
-  shadcn.
-- Components split by feature, with no single page holding a large UI.
-- Keeping the role toggle instead of building login, as the brief allows.
-- An API reference and a Postman collection, and graceful handling of an empty database.
-
-**Where the AI was wrong and I corrected it**
-- It installed a Prisma 8 release candidate next to the Prisma 7 client; pinned both to 7.10.
-- It computed "today" in UTC, so payments made after midnight in Bangladesh were refused as future
-  dated. Fixed to use Bangladesh time, with a test.
-- It counted deferred and withdrawn students as "missing" submissions.
-- The landing page was built as a static page, so it showed stale data; it now renders per request.
-- shadcn's setup left the font variable pointing at itself, so the UI fell back to a serif font.
-- Buttons rendered as links were missing the Base UI setting that keeps them accessible.
-
-**How I checked the output:** I read every change, ran the lint, type check, tests and build, and
-clicked through every page in both views before submitting.
